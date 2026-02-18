@@ -25,7 +25,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Enable CORS with proper configuration
 app.use(
     cors({
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        origin: [
+            'http://localhost:5173',
+            'https://pes-event-hub.vercel.app',
+            process.env.CLIENT_URL,
+        ].filter(Boolean),
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
