@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# Whitelist backend and frontend
+!backend/
+!frontend/
+!.gitignore
