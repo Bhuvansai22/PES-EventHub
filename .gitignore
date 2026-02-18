@@ -1,8 +1,8 @@
 # Ignore everything
-*
+/*
 
 # Whitelist backend and frontend
-!backend/
-!frontend/
+!/backend/
+!/frontend/
 !.gitignore
 !README.md
