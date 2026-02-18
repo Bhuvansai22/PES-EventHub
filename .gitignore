@@ -6,3 +6,4 @@
 !/frontend/
 !.gitignore
 !README.md
+!frontend/.env.production
