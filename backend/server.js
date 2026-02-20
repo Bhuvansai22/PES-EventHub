@@ -37,6 +37,7 @@ app.use(
         origin: [
             'http://localhost:5173',
             'https://pes-event-hub.vercel.app',
+            'http://192.168.31.113:5173',
             process.env.CLIENT_URL,
         ].filter(Boolean),
         credentials: true,

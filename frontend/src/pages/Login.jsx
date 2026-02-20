@@ -87,6 +87,15 @@ const Login = () => {
                                 />
                             </div>
 
+                            <div className="flex items-center justify-end">
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-sm font-medium text-primary-600 hover:text-primary-500"
+                                >
+                                    Forgot your password?
+                                </Link>
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={loading}
