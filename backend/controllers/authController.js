@@ -160,15 +160,10 @@ export const forgotPassword = async (req, res) => {
 
         await user.save({ validateBeforeSave: false });
 
-        // Create reset url
-        const resetUrl = `${req.protocol}://${req.get(
-            'host'
-        )}/api/auth/reset-password/${resetToken}`;
-
         // Create frontend reset url (for email)
         const frontendResetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-        const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl} \n\n or click on the following link to reset your password: \n\n ${frontendResetUrl}`;
+        const message = `You are receiving this email because you (or someone else) has requested a password reset for your PES EventHub account.\n\nClick the link below to reset your password:\n\n${frontendResetUrl}\n\nThis link will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.`;
 
 
 

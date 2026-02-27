@@ -25,8 +25,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            // Token expired or invalid
+        if (error.response?.status === 401 && !error.config.url.includes('/login')) {
+            // Token expired or invalid (but not for login failures)
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('user');
             window.location.href = '/login';
