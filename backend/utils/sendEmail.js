@@ -1,24 +1,21 @@
-import nodemailer from 'nodemailer';
+import * as SibApiV3Sdk from '@getbrevo/brevo';
 
 const sendEmail = async (options) => {
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
-        auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD,
-        },
-    });
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-    const message = {
-        from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message,
+    apiInstance.authentications['apiKey'].apiKey = process.env.BREVO_API_KEY;
+
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+    sendSmtpEmail.subject = options.subject;
+    sendSmtpEmail.textContent = options.message;
+    sendSmtpEmail.sender = {
+        name: process.env.FROM_NAME,
+        email: process.env.FROM_EMAIL,
     };
+    sendSmtpEmail.to = [{ email: options.email }];
 
-    const info = await transporter.sendMail(message);
+    const info = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
     console.log('Message sent: %s', info.messageId);
 };
