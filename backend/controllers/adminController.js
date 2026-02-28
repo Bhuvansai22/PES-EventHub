@@ -7,12 +7,14 @@ import { generateCSV } from '../utils/csvExport.js';
 // @access  Private (Admin)
 export const createEvent = async (req, res) => {
     try {
-        const { title, description, date, time, venue, registrationDeadline, whatsappGroupLink, rules, paymentRequired, paymentAmount, paymentQRCode } =
+        const { title, description, department, clubName, date, time, venue, registrationDeadline, whatsappGroupLink, rules, paymentRequired, paymentAmount, paymentQRCode } =
             req.body;
 
         const event = await Event.create({
             title,
             description,
+            department: department || undefined,
+            clubName: clubName || undefined,
             date,
             time,
             venue,
@@ -97,6 +99,14 @@ export const deleteEvent = async (req, res) => {
             return res.status(403).json({
                 success: false,
                 message: 'Only the event creator can delete this event',
+            });
+        }
+
+        // Prevent deletion of completed events
+        if (new Date(event.date) < new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot delete events that have already occurred.',
             });
         }
 
@@ -236,6 +246,66 @@ export const getDashboardStats = async (req, res) => {
             },
             recentEvents,
         });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// @desc    Download comprehensive report of all events
+// @route   GET /api/admin/reports/completed-events
+// @access  Private (Admin)
+export const getCompletedEventsReport = async (req, res) => {
+    try {
+        // Fetch all events
+        const allEvents = await Event.find()
+            .populate('createdBy', 'name')
+            .populate('registrationCount');
+
+        if (!allEvents || allEvents.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No events found.',
+            });
+        }
+
+        // Prepare data for CSV
+        const data = allEvents.map((event) => {
+            const eventDate = new Date(event.date);
+            const dateStr = eventDate.toLocaleDateString('en-US');
+            const revenue = event.paymentRequired ? ((event.registrationCount || 0) * (event.paymentAmount || 0)) : 0;
+            const status = eventDate < new Date() ? 'Completed' : 'Upcoming';
+
+            return {
+                'Event Title': event.title,
+                'Event Status': status,
+                'Department': event.department || 'N/A',
+                'Club Name': event.clubName || 'N/A',
+                'Date': dateStr,
+                'Venue': event.venue,
+                'Organizer': event.createdBy?.name || 'Unknown',
+                'Registrations': event.registrationCount || 0,
+                'Payment Required': event.paymentRequired ? 'Yes' : 'No',
+                'Revenue (₹)': revenue
+            };
+        });
+
+        const fields = [
+            'Event Title', 'Event Status', 'Department', 'Club Name', 'Date',
+            'Venue', 'Organizer', 'Registrations', 'Payment Required', 'Revenue (₹)'
+        ];
+        const csv = generateCSV(data, fields);
+
+        // Set headers for file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename="completed_events_report.csv"'
+        );
+
+        res.status(200).send(csv);
     } catch (error) {
         res.status(500).json({
             success: false,

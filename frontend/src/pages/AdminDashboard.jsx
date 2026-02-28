@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
-
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [events, setEvents] = useState([]);
+    const [filteredEvents, setFilteredEvents] = useState([]);
+    const [activeTab, setActiveTab] = useState('ongoing');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(null);
@@ -18,6 +19,14 @@ const AdminDashboard = () => {
             const response = await api.get('/api/admin/dashboard/stats');
             setStats(response.data.stats);
             setEvents(response.data.recentEvents);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (activeTab === 'ongoing') {
+                setFilteredEvents(response.data.recentEvents.filter(e => new Date(e.date) >= today));
+            } else {
+                setFilteredEvents(response.data.recentEvents.filter(e => new Date(e.date) < today));
+            }
         } catch (err) {
             setError('Failed to load dashboard data');
             console.error(err);
@@ -46,6 +55,42 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (tab === 'ongoing') {
+            setFilteredEvents(events.filter(e => new Date(e.date) >= today));
+        } else {
+            setFilteredEvents(events.filter(e => new Date(e.date) < today));
+        }
+    };
+
+    const handleDownloadReport = async () => {
+        try {
+            const response = await api.get('/api/admin/reports/completed-events', {
+                responseType: 'blob', // Important for downloading files
+            });
+
+            // Create a blob from the response data
+            const blob = new Blob([response.data], { type: 'text/csv' });
+
+            // Create a link element and trigger download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'completed_events_report.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            alert('Failed to download report. Ensure there are completed events available.');
+            console.error(err);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -58,9 +103,11 @@ const AdminDashboard = () => {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-5xl font-bold mb-4">Admin Dashboard</h1>
-                    <p className="text-xl text-primary-100">Manage events and view statistics</p>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-5xl font-bold mb-4">Admin Dashboard</h1>
+                        <p className="text-xl text-primary-100">Manage events and view statistics</p>
+                    </div>
                 </div>
             </div>
 
@@ -120,10 +167,30 @@ const AdminDashboard = () => {
                     </Link>
                 </div>
 
-                {/* Events Table */}
+                {/* Events Table Section */}
                 <div className="card">
-                    <div className="card-header">
-                        <h2 className="text-2xl font-bold">Recent Events</h2>
+                    <div className="card-header flex justify-between items-center sm:flex-row flex-col gap-4">
+                        <h2 className="text-2xl font-bold">Events List</h2>
+                        <div className="flex bg-gray-100 rounded-lg p-1">
+                            <button
+                                onClick={() => handleTabChange('ongoing')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'ongoing'
+                                    ? 'bg-white text-primary-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                Ongoing
+                            </button>
+                            <button
+                                onClick={() => handleTabChange('completed')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'completed'
+                                    ? 'bg-white text-primary-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                Completed
+                            </button>
+                        </div>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -147,14 +214,14 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {events.length === 0 ? (
+                                {filteredEvents.length === 0 ? (
                                     <tr>
                                         <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                                            No events created yet
+                                            No events found in this category
                                         </td>
                                     </tr>
                                 ) : (
-                                    events.map((event) => (
+                                    filteredEvents.map((event) => (
                                         <tr key={event._id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">{event.title}</div>
@@ -185,13 +252,19 @@ const AdminDashboard = () => {
                                                 >
                                                     Edit
                                                 </Link>
-                                                <button
-                                                    onClick={() => handleDelete(event._id)}
-                                                    disabled={deleteLoading === event._id}
-                                                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                                                >
-                                                    {deleteLoading === event._id ? 'Deleting...' : 'Delete'}
-                                                </button>
+                                                {new Date(event.date) < new Date() ? (
+                                                    <span className="text-gray-400 cursor-not-allowed" title="Cannot delete completed events">
+                                                        Completed
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleDelete(event._id)}
+                                                        disabled={deleteLoading === event._id}
+                                                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                                                    >
+                                                        {deleteLoading === event._id ? 'Deleting...' : 'Delete'}
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))

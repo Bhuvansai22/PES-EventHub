@@ -11,6 +11,14 @@ const eventSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Please provide event description'],
         },
+        department: {
+            type: String,
+            trim: true,
+        },
+        clubName: {
+            type: String,
+            trim: true,
+        },
         date: {
             type: Date,
             required: [true, 'Please provide event date'],

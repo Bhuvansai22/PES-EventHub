@@ -16,8 +16,22 @@ const EventCard = ({ event }) => {
     return (
         <Link to={`/events/${event._id}`}>
             <div className="card hover:scale-105 transition-transform duration-300 cursor-pointer">
-                <div className="card-header">
-                    <h3 className="text-xl font-bold truncate">{event.title}</h3>
+                <div className="card-header pt-3 pb-4">
+                    <h3 className="text-2xl font-bold truncate mb-1">{event.title}</h3>
+                    {(event.department || event.clubName) && (
+                        <div className="flex flex-col mt-2">
+                            {event.department && (
+                                <span className="text-gray-200/90 text-sm font-semibold truncate leading-tight">
+                                    {event.department}
+                                </span>
+                            )}
+                            {event.clubName && (
+                                <span className="text-gray-400 font-bold text-xs uppercase tracking-wider mt-1 truncate">
+                                    {event.clubName}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="card-body">
                     <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>

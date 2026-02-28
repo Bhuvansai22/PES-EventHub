@@ -7,6 +7,8 @@ const CreateEvent = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        department: '',
+        clubName: '',
         date: '',
         time: '',
         venue: '',
@@ -110,6 +112,38 @@ const CreateEvent = () => {
                                     className="input-field"
                                     placeholder="Describe the event in detail..."
                                 />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Department (Optional)
+                                    </label>
+                                    <input
+                                        id="department"
+                                        name="department"
+                                        type="text"
+                                        value={formData.department}
+                                        onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Dept of CSE"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="clubName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Club Name (Optional)
+                                    </label>
+                                    <input
+                                        id="clubName"
+                                        name="clubName"
+                                        type="text"
+                                        value={formData.clubName}
+                                        onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Tech Club"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

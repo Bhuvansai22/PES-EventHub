@@ -8,6 +8,8 @@ const EditEvent = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        department: '',
+        clubName: '',
         date: '',
         time: '',
         venue: '',
@@ -38,6 +40,8 @@ const EditEvent = () => {
             setFormData({
                 title: event.title,
                 description: event.description,
+                department: event.department || '',
+                clubName: event.clubName || '',
                 date: eventDate,
                 time: event.time,
                 venue: event.venue,
@@ -151,6 +155,38 @@ const EditEvent = () => {
                                     onChange={handleChange}
                                     className="input-field"
                                 />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Department (Optional)
+                                    </label>
+                                    <input
+                                        id="department"
+                                        name="department"
+                                        type="text"
+                                        value={formData.department}
+                                        onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Dept of CSE"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="clubName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Club Name (Optional)
+                                    </label>
+                                    <input
+                                        id="clubName"
+                                        name="clubName"
+                                        type="text"
+                                        value={formData.clubName}
+                                        onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Tech Club"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

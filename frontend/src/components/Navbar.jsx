@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
 
     return (
         <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
@@ -30,7 +30,7 @@ const Navbar = () => {
                                 >
                                     Events
                                 </Link>
-                                {user.role !== 'admin' && (
+                                {user && !isAdmin && (
                                     <Link
                                         to="/profile"
                                         className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
@@ -38,7 +38,7 @@ const Navbar = () => {
                                         Profile
                                     </Link>
                                 )}
-                                {user.role === 'admin' && (
+                                {isAdmin && (
                                     <Link
                                         to="/admin/dashboard"
                                         className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
@@ -113,7 +113,7 @@ const Navbar = () => {
                                 >
                                     Events
                                 </Link>
-                                {user.role !== 'admin' && (
+                                {user && !isAdmin && (
                                     <Link
                                         to="/profile"
                                         className="block text-gray-700 hover:text-primary-600 font-medium transition-colors"
@@ -122,7 +122,7 @@ const Navbar = () => {
                                         Profile
                                     </Link>
                                 )}
-                                {user.role === 'admin' && (
+                                {isAdmin && (
                                     <Link
                                         to="/admin/dashboard"
                                         className="block text-gray-700 hover:text-primary-600 font-medium transition-colors"

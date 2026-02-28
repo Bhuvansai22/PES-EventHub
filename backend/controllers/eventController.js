@@ -71,7 +71,10 @@ export const registerForEvent = async (req, res) => {
         }
 
         // Check if registration deadline has passed
-        if (new Date() > new Date(event.registrationDeadline)) {
+        // We set the deadline to the end of the day (23:59:59.999) on the specified date
+        const deadlineDate = new Date(event.registrationDeadline);
+        deadlineDate.setHours(23, 59, 59, 999);
+        if (new Date() > deadlineDate) {
             return res.status(400).json({
                 success: false,
                 message: 'Registration deadline has passed',

@@ -136,6 +136,12 @@ const EventDetails = () => {
                         <h1 className="text-3xl font-bold">
                             {event.title}
                         </h1>
+                        {(event.department || event.clubName) && (
+                            <div className="mt-2 text-sm font-semibold text-gray-700">
+                                {event.department && <div>{event.department}</div>}
+                                {event.clubName && <div className="uppercase tracking-wide text-xs mt-1 text-gray-500">{event.clubName}</div>}
+                            </div>
+                        )}
                     </div>
 
                     <div className="card-body space-y-4">
